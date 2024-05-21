@@ -1,5 +1,4 @@
 import math
-from functools import reduce
 from math import factorial
 
 import numpy as np
@@ -133,6 +132,7 @@ def print_finite_differences_table(x, y):
         for j in range(n - i):
             print(f'\t{table[i, j]:.4f}\t', end='')
         print()
+    print()
 
 
 def lagrange_interpolation(x, y, value):
@@ -246,16 +246,16 @@ def bessel_interpolation(x, y, value):
                 current = current * (t + dts[j])
                 # print(f"current={current}")
 
-            current = current / (factorial(i))
-            current = current * central_differences_table[i][alpha_index - 1 - k]
+            current /= (factorial(i))
+            current *= central_differences_table[i][alpha_index - 1 - k]
             # print(central_differences_table[i][alpha_index-k-1])
             result += current
             k += 1
         else:
             current = 1
             for j in range(i):
-                current = current * (t + dts[j])
-            current = current / (factorial(i))
+                current *= (t + dts[j])
+            current /= (factorial(i))
             current *= (central_differences_table[i][alpha_index - l - 2] + central_differences_table[i][
                 alpha_index - 1 - l]) / 2
             # print("Четная")
@@ -311,10 +311,11 @@ def plot_all_interpolations(x, y, x_value, results,y_coord):
     plt.title("График все интерполяционных многочленов")
     plt.show()
 def main():
-    global gauss_result, stirling_result, bessel_result
+    global gauss_result, stirling_result, bessel_result,newton_result
     gauss_result = None
     stirling_result = None
     bessel_result = None
+    newton_result=None
     x, y = input_data()
     if x is None or y is None:
         return
@@ -332,9 +333,17 @@ def main():
     newton_result = newton_interpolation_with_shared_difference(x, y, value)
     lagrange_result = lagrange_interpolation(x, y, value)
     results = {
-        'lagrange': generate_data_for_graphik(x, y, lagrange_interpolation),
-        'newton': generate_data_for_graphik(x, y, newton_interpolation_with_shared_difference)
-    }
+        'lagrange': generate_data_for_graphik(x, y, lagrange_interpolation)}
+
+
+    if check_finite_differences(x):
+        print(
+            "Невозможно построить интерполяционный многочлен Ньютотна с разделенными разностями из-за некорректных входных данных\n"
+            "Проверьте значения x, они не должны быть равноотстоящими\n")
+    else:
+        newton_result = newton_interpolation_with_shared_difference(x, y, value)
+        results['newton'] = generate_data_for_graphik(x, y, newton_interpolation_with_shared_difference)
+
     if len(x) % 2 == 1 and check_finite_differences(x):
         gauss_result = gauss_interpolation(x, y, value)
         stirling_result = stirling_interpolation(x, y, value)
@@ -350,10 +359,17 @@ def main():
     xs,ys=generate_data_for_graphik(x,y,lagrange_interpolation)
     plot_interpolation(xs, ys, lagrange_interpolation, "Метод Лагранжа", value,x,y)
 
-    print(f"Метод Ньютона с разделенными разностями: {newton_result}\n")
-    xs,ys=generate_data_for_graphik(x,y,newton_interpolation_with_shared_difference)
-    plot_interpolation(xs, ys, newton_interpolation_with_shared_difference, "Метод Ньютона с разделенными разностями",
-                       value,x,y)
+
+    if newton_result is not None:
+        print(f"Метод Ньютона с разделенными разностями: {newton_result}\n")
+        xs, ys = generate_data_for_graphik(x, y, newton_interpolation_with_shared_difference)
+        plot_interpolation(xs, ys, newton_interpolation_with_shared_difference,
+                           "Метод Ньютона с разделенными разностями",
+                           value, x, y)
+
+    else:
+        print("Невозможно построить интерполяционный многочлен Ньютотна с разделенными разностями из-за некорректных входных данных\n"
+              "Проверьте значения x, они не должны быть равноотстоящими\n")
 
     if gauss_result is not None:
         print(f"Метод Гаусса: {gauss_result}\n")
@@ -370,6 +386,7 @@ def main():
     else:
         print("Невозможно построить интерполяционный многочлен Стирлинга из-за некорректных входных данных\n"
               "Проверьте значения x, они должны быть равноотстоящими и их количество должно быть нечетным\n")
+
     if bessel_result is not None:
         print(f"Метод Бесселя: {bessel_result}\n")
         xs,ys=generate_data_for_graphik(x,y,bessel_interpolation)
