@@ -150,6 +150,7 @@ def newton_interpolation_with_shared_difference(x, y, value):
     return result
 
 
+
 def generate_array_offset(n):
     dts = [0]
     for i in range(1, n + 1):
