@@ -378,7 +378,7 @@ def main():
     else:
         print("Невозможно построить интерполяционный многочлен Бесселя из-за некорректных входных данных\n"
               "Проверьте значения x, они должны быть равноотстоящими и их количество должно быть четным\n")
-    plot_all_interpolations(x, y, value, results, y_coord=newton_result)
+    plot_all_interpolations(x, y, value, results, y_coord=lagrange_result)
 
 
 if __name__ == "__main__":
